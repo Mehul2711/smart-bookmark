@@ -9,7 +9,6 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [isAdding, setIsAdding] = useState(false);
-  // Check user session on load
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);
@@ -24,11 +23,9 @@ export default function Home() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch bookmarks and subscribe to real-time changes
   useEffect(() => {
     if (!user) return;
 
-    // 1. Fetch initial bookmarks
     const fetchBookmarks = async () => {
       const { data } = await supabase
         .from("bookmarks")
@@ -38,7 +35,6 @@ export default function Home() {
     };
     fetchBookmarks();
 
-    // 2. Setup Real-time listener
     const channel = supabase
       .channel("realtime bookmarks")
       .on(
@@ -60,7 +56,6 @@ export default function Home() {
     };
   }, [user]);
 
-  // Handle Login / Logout
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({ provider: "google" });
   };
@@ -68,14 +63,12 @@ export default function Home() {
     await supabase.auth.signOut();
   };
 
-  // Add Bookmark
   const addBookmark = async (e) => {
     e.preventDefault();
     if (!title || !url) return;
 
-    setIsAdding(true); // 1. Start the loader
+    setIsAdding(true);
 
-    // Ensure URL has http/https
     const validUrl = url.startsWith("http") ? url : `https://${url}`;
 
     const { error } = await supabase
@@ -89,15 +82,12 @@ export default function Home() {
       alert("Error adding bookmark");
     }
 
-    setIsAdding(false); // 2. Stop the loader when finished
+    setIsAdding(false);
   };
 
-  // Delete Bookmark
   const deleteBookmark = async (id) => {
     await supabase.from("bookmarks").delete().match({ id });
   };
-
-  // --- UI RENDERING ---
 
   if (!user) {
     return (
@@ -179,7 +169,6 @@ export default function Home() {
           </button>
         </form>
 
-        {/* Bookmark List */}
         <ul className="space-y-3">
           {bookmarks.length === 0 && (
             <p className="text-gray-500 text-bold text-lg">No bookmarks yet.</p>
