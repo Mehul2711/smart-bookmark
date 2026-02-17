@@ -8,7 +8,7 @@ export default function Home() {
   const [bookmarks, setBookmarks] = useState([]);
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
-
+  const [isAdding, setIsAdding] = useState(false);
   // Check user session on load
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -73,6 +73,8 @@ export default function Home() {
     e.preventDefault();
     if (!title || !url) return;
 
+    setIsAdding(true); // 1. Start the loader
+
     // Ensure URL has http/https
     const validUrl = url.startsWith("http") ? url : `https://${url}`;
 
@@ -86,6 +88,8 @@ export default function Home() {
     } else {
       alert("Error adding bookmark");
     }
+
+    setIsAdding(false); // 2. Stop the loader when finished
   };
 
   // Delete Bookmark
@@ -146,9 +150,10 @@ export default function Home() {
           />
           <button
             type="submit"
-            className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+            disabled={isAdding}
+            className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed min-w-[100px]"
           >
-            Add
+            {isAdding ? "Adding..." : "Add"}
           </button>
         </form>
 
